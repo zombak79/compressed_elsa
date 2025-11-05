@@ -358,10 +358,10 @@ class CompressedSparseElsaRecommender:
         fig = px.bar(df, x='latent', y='val',
                 title=f"Latent factors for the test user {userid}",
                 labels={'latent': 'Latent Dimension', 'val': 'Value'},
-                color_discrete_sequence=['gray'])  # fixed gray color
+                color_discrete_sequence=['lightgray'])  # fixed gray color
 
         # remove colorbar (since we’re not using continuous color)
-        fig.update_traces(marker_color='gray', showlegend=False)
+        fig.update_traces(marker_color='lightgray', showlegend=False)
         fig.update_layout(coloraxis_showscale=False)
 
         # optional: cleaner look
@@ -379,12 +379,44 @@ class CompressedSparseElsaRecommender:
             scatter_y = df_seg.val.to_list()
             
             # Scatter points
+            # fig.add_trace(go.Scatter(
+            #    y=scatter_y,
+            #    x=scatter_x,
+            #    mode='markers',
+            #    name=f'{segids[i]}' + (f'({scores[i]:.2f})' if scores else ''),  # Legend label
+            #    marker=dict(color=colors[i], size=10, symbol='circle')
+            #))
+            # thin bars from 0 -> y (the “shaft” of the arrow)
+            seg=segids[i]
+            xs = df_seg['latent'].tolist()
+            ys = df_seg['val'].tolist()
+
+            # draw vertical lines
+            for x, y in zip(xs, ys):
+                fig.add_trace(go.Scatter(
+                    x=[x, x],
+                    y=[0, y],
+                    mode='lines',
+                    line=dict(color=colors[i], width=2),
+                    name=f'{seg}' + (f' ({scores[i]:.2f})' if scores else ''),
+                    legendgroup=f'seg{i}',
+                    showlegend=False  # legend only on marker trace
+                ))
+
+            # triangle tips (up for +, down for -)
+            symbols = ['triangle-up' if v >= 0 else 'triangle-down' for v in ys]
             fig.add_trace(go.Scatter(
-                x=scatter_x,
-                y=scatter_y,
+                x=xs, y=ys,
                 mode='markers',
+                marker=dict(
+                    color=colors[i],
+                    symbol=symbols,
+                    size=9,
+                    #line=dict(width=1, color='white')  # crisp tips
+                ),
                 name=f'{segids[i]}' + (f'({scores[i]:.2f})' if scores else ''),  # Legend label
-                marker=dict(color=colors[i], size=7, symbol='circle')
+                legendgroup=f'seg{i}',
+                #showlegend=False                    # keep legend from the bar trace
             ))
         
         # Layout tweaks
