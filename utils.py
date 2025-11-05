@@ -13,6 +13,19 @@ import torch
 from scipy import sparse
 import scipy
 
+PALETTE = [
+    "#E6194B",  # vivid red
+    "#3CB44B",  # bright green
+    "#4363D8",  # bold blue
+    "#F58231",  # strong orange
+    "#911EB4",  # deep purple
+    "#46F0F0",  # cyan
+    "#F032E6",  # magenta
+    "#BCF60C",  # lime
+    "#FABEBE",  # soft pink
+    "#008080"   # teal
+]
+
 @st.cache_data
 def get_data(dataset: str):
     return pd.read_feather(f"data/{dataset}_df.feather")
@@ -238,15 +251,15 @@ function scrollRail(id,dx){const el=document.getElementById(id); if(el) el.scrol
     # ensure no leading indentation sneaks in:
     st.markdown(textwrap.dedent(row_html), unsafe_allow_html=True)
 
-def transform_items_for_row(items):
+def transform_items_for_row(items, show_scores=False, show_ids=False):
     return [
         {
             "id": str(row.book_id),
             "image": row.image_url,
-            "title": row.original_title,
+            "title": f"{'['+str(row.book_id)+'] ' if show_ids else ''}{row.original_title if row.original_title is not None or "title" not in row else row.title} ({row.recomm_scores:.2f})" if "recomm_scores" in row and show_scores else f"{'['+str(row.book_id)+'] ' if show_ids else ''}{row.original_title}",
             "authors": row.authors,
             "description": row.mistral_7b[:225]+"...",
-        } for i,row in items[["book_id", "image_url", "original_title", "authors", "mistral_7b"]].iterrows()
+        } for i,row in items.iterrows()
     ]
 
 class TOC:
@@ -316,3 +329,63 @@ class CompressedSparseElsaRecommender:
             x=x.toarray()
         scores, indices = topk((x@self.A@self.B.T), k)
         return {k:v for k,v in dict(zip(list(self.segment_names[indices[0]]), scores[0])).items() if v>0}
+
+    def explore_user_segments(self, x, segids, userid, scores=None):
+        colors = PALETTE[:len(segids)]
+        U=x@self.A
+        _,i=np.where(U.toarray()!=0)
+        U.toarray()[0,i]
+        df=pd.DataFrame(U.toarray()[0,i]).reset_index()
+        df["index"]=i
+        df=df[["index",0]]
+        df.columns=["latent", "val"]
+
+        fig = px.bar(df, x='latent', y='val',
+                title=f"Latent factors for the test user {userid}",
+                labels={'latent': 'Latent Dimension', 'val': 'Value'},
+                color_discrete_sequence=['gray'])  # fixed gray color
+
+        # remove colorbar (since we’re not using continuous color)
+        fig.update_traces(marker_color='gray', showlegend=False)
+        fig.update_layout(coloraxis_showscale=False)
+
+        # optional: cleaner look
+        fig.update_layout(
+            xaxis=dict(type='category'),
+            plot_bgcolor='white',
+            yaxis_title='Value'
+        )
+        
+        for i in range(len(segids)):
+            S=self.B.toarray()[np.where(self.segment_names==segids[i])[0]]
+            _,j=np.where(S!=0)
+
+            df_seg=pd.DataFrame(S[0,j]).reset_index()
+            df_seg["index"]=j
+            df_seg=df_seg[["index",0]]
+            df_seg.columns=["latent", "val"]
+            df_seg=df_seg[df_seg.latent.isin(df.latent)]
+            
+            # Example scatter data (you can replace this with your own)
+            scatter_x = df_seg.latent.to_list()
+            scatter_y = df_seg.val.to_list()
+            
+            # Scatter points
+            fig.add_trace(go.Scatter(
+                x=scatter_x,
+                y=scatter_y,
+                mode='markers',
+                name=f'{segids[i]}' + (f'({scores[i]:.2f})' if scores else ''),  # Legend label
+                marker=dict(color=colors[i], size=7, symbol='circle')
+            ))
+        
+        # Layout tweaks
+        fig.update_layout(
+            title=f'Latent factors analysis for the test user "{userid}"',
+            xaxis_title='Latent Dimension',
+            yaxis_title='Value',
+            plot_bgcolor='white',
+            xaxis=dict(type='category'),
+            showlegend=True
+        )
+        return fig

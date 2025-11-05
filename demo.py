@@ -34,19 +34,37 @@ rec = CompressedSparseElsaRecommender(A, items, items_idx, B, segments)
 with st.sidebar:
     # pick a user from the list
     user_index = st.selectbox(
-        label="Select user", 
+        label="Select a user from the test set", 
         options=np.arange(X_test.shape[0]), 
         index=1488
     )
     user = X_test[user_index]
 
+    # checkbox to show latent space analysis
+    show_analysis = st.checkbox("Show latent space analysis", value=True)
+
     # checkbox to show/hide user history
     show_user_history = st.checkbox("Show user history", value=True)
+
+    # checkbox to show scores
+    show_scores = st.checkbox("Show scores", value=True)
+
+    # checkbox to show ids
+    show_ids = st.checkbox("Show item ids", value=False)
 
     # select k for recomms
     k = st.select_slider("Select number of recommendations per row", options=range(MIN_RECOMMS,MAX_RECOMMS+1), value = DEFAULT_RECOMMS)
 
     num_segments = st.select_slider("Select number of recommended segments", options=range(MIN_SEGMENTS,MAX_SEGMENTS+1), value = DEFAULT_SEGMENTS)
+
+# Standard recommendations by the Compressed Sparse ELSA model
+recommended_items=rec.recommend_items(user, k=k)
+# Get recommended segments
+recommended_segments = rec.recommend_segments(user, k=num_segments)
+
+if show_analysis:
+    fig=rec.explore_user_segments(user, list(recommended_segments.keys()), user_index, scores=list(recommended_segments.values()) if show_scores else None)
+    st.plotly_chart(fig, use_container_width=True)
 
 if show_user_history:
     # Show all items interacted by the user
@@ -55,40 +73,41 @@ if show_user_history:
         transform_items_for_row(
             rec.get_user_history(
                 user,
-            )
+            ),
+            show_ids=show_ids,
+            show_scores=show_scores,
         ), 
         row_id=f"rail_{0}"
     )
 
-# Standard recommendations by the Compressed Sparse ELSA model
-recommended_items=rec.recommend_items(user, k=k)
 render_row(
     "Recommended for you", 
     transform_items_for_row(
         recommended_items,
+        show_scores=show_scores,
+        show_ids=show_ids,
     ), 
     row_id=f"rail_{0}"
 )
-# print(set(recommended_items.book_id.to_list()))
-# Get recommended segments
-recommended_segments = rec.recommend_segments(user, k=num_segments)
 
 # Render each segment and make personalized order inside the segment
 i = 0
 for recommended_segment, score in recommended_segments.items():
     i+=1
+
     render_row(
-        recommended_segment, 
+        f"{recommended_segment} ({score:.2f})" if show_scores else f"{recommended_segment}", 
         transform_items_for_row(
             rec.recommend_items(
                 user,
                 segment=recommended_segment,
                 k=k,
             ),
+            show_scores=show_scores,
+            show_ids=show_ids,
         ), 
         row_id=f"rail_{0}",
     )
-
 
 # render table of content
 toc()
