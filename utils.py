@@ -411,7 +411,7 @@ class CompressedSparseElsaRecommender:
                 marker=dict(
                     color=colors[i],
                     symbol=symbols,
-                    size=9,
+                    size=15,
                     #line=dict(width=1, color='white')  # crisp tips
                 ),
                 name=f'{segids[i]}' + (f'({scores[i]:.2f})' if scores else ''),  # Legend label
