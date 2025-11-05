@@ -7,7 +7,7 @@ DEFAULT_RECOMMS = 10
 
 MIN_SEGMENTS = 1
 MAX_SEGMENTS = 10
-DEFAULT_SEGMENTS = 3
+DEFAULT_SEGMENTS = 5
 
 # load all data, cached inside the utils module
 goodbooks_df=get_data("goodbooks")
@@ -43,11 +43,13 @@ with st.sidebar:
     # checkbox to show latent space analysis
     show_analysis = st.checkbox("Show latent space analysis", value=True)
 
+    only_active = st.checkbox("Show only latents for matching segments", value=True, disabled=not show_analysis)
+
     # checkbox to show/hide user history
-    show_user_history = st.checkbox("Show user history", value=True)
+    show_user_history = st.checkbox("Show user history", value=False)
 
     # checkbox to show scores
-    show_scores = st.checkbox("Show scores", value=True)
+    show_scores = st.checkbox("Show scores", value=False)
 
     # checkbox to show ids
     show_ids = st.checkbox("Show item ids", value=False)
@@ -63,7 +65,7 @@ recommended_items=rec.recommend_items(user, k=k)
 recommended_segments = rec.recommend_segments(user, k=num_segments)
 
 if show_analysis:
-    fig=rec.explore_user_segments(user, list(recommended_segments.keys()), user_index, scores=list(recommended_segments.values()) if show_scores else None)
+    fig=rec.explore_user_segments(user, list(recommended_segments.keys()), user_index, scores=list(recommended_segments.values()) if show_scores else None, only_active=only_active)
     st.plotly_chart(fig, use_container_width=True)
 
 if show_user_history:

@@ -139,10 +139,7 @@ def plot_three_side_by_side(df1, df2, df3, titles=("Recall@20","Recall@50","NDCG
             
         if baselines[i-1] is not None:
             fig.add_hline(y=baselines[i-1], annotation_text=f"dense ELSA ({baselines[i-1]:.3f})", line_color="black", line_dash="dash",row=1, col=i),
-                
-            
-
-        #fig.update_xaxes(autorange="reversed", tickvals=[128, 64, 32, 16, 8], title_text="nnz", row=1, col=i)
+        
         fig.update_yaxes(title_text="", row=1, col=i)
         fig.update_xaxes(type="category", categoryorder="array",
                      categoryarray=cat_str, tickangle=0, title_text="nnz",
@@ -330,8 +327,22 @@ class CompressedSparseElsaRecommender:
         scores, indices = topk((x@self.A@self.B.T), k)
         return {k:v for k,v in dict(zip(list(self.segment_names[indices[0]]), scores[0])).items() if v>0}
 
-    def explore_user_segments(self, x, segids, userid, scores=None):
+    def explore_user_segments(self, x, segids, userid, scores=None, only_active=False):
         colors = PALETTE[:len(segids)]
+
+        # prepare segment dataframes
+        seg_dfs = []
+        for i in range(len(segids)):
+            S=self.B.toarray()[np.where(self.segment_names==segids[i])[0]]
+            _,j=np.where(S!=0)
+
+            df_seg=pd.DataFrame(S[0,j]).reset_index()
+            df_seg["index"]=j
+            df_seg=df_seg[["index",0]]
+            df_seg.columns=["latent", "val"]
+            seg_dfs.append(df_seg)
+
+        # user latents
         U=x@self.A
         _,i=np.where(U.toarray()!=0)
         U.toarray()[0,i]
@@ -339,6 +350,10 @@ class CompressedSparseElsaRecommender:
         df["index"]=i
         df=df[["index",0]]
         df.columns=["latent", "val"]
+
+        if only_active:
+            all_dfs = pd.concat(seg_dfs)
+            df = df[df.latent.isin(all_dfs.latent)]
 
         fig = px.bar(df, x='latent', y='val',
                 title=f"Latent factors for the test user {userid}",
@@ -357,15 +372,8 @@ class CompressedSparseElsaRecommender:
         )
         
         for i in range(len(segids)):
-            S=self.B.toarray()[np.where(self.segment_names==segids[i])[0]]
-            _,j=np.where(S!=0)
-
-            df_seg=pd.DataFrame(S[0,j]).reset_index()
-            df_seg["index"]=j
-            df_seg=df_seg[["index",0]]
-            df_seg.columns=["latent", "val"]
+            df_seg=seg_dfs[i]
             df_seg=df_seg[df_seg.latent.isin(df.latent)]
-            
             # Example scatter data (you can replace this with your own)
             scatter_x = df_seg.latent.to_list()
             scatter_y = df_seg.val.to_list()
