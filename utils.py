@@ -104,13 +104,13 @@ def highlight_cells(x):
     return df_styled
 
 # plot three graphs
-def plot_three_side_by_side(df1, df2, df3, titles=("Recall@20","Recall@50","NDCG@100"), baselines=[None, None, None], legend_title_text="Method"):
+def plot_three_side_by_side(df1, df2, df3, titles=("Recall@20","Recall@50","NDCG@100"), baselines=[None, None, None], legend_title_text="Method", xcol="nnz"):
     # Collect method names (all columns except 'nnz')
     # normalize once
     (df1, df2, df3), cat_str = normalize_x_as_reversed_categories(
-        df1, df2, df3
+        df1, df2, df3, xcol=xcol
     )
-    def methods(df): return [c for c in df.columns if c not in ["nnz", "nnz_cat"]]
+    def methods(df): return [c for c in df.columns if c not in [xcol, "nnz_cat"]]
     all_methods = list(dict.fromkeys(methods(df1) + methods(df2) + methods(df3)))  # stable order
 
     # Consistent colors across all panels
@@ -132,7 +132,7 @@ def plot_three_side_by_side(df1, df2, df3, titles=("Recall@20","Recall@50","NDCG
                     legendgroup=m,               # link traces across subplots
                     line=dict(color=color_map[m]),
                     marker=dict(color=color_map[m]),
-                    hovertemplate = f"nnz=%{{x}}<br>%{{y:.4f}}<extra>{m}</extra>"
+                    hovertemplate = f"{xcol}=%{{x}}<br>%{{y:.4f}}<extra>{m}</extra>"
                 ),
                 row=1, col=i
             )
@@ -142,7 +142,7 @@ def plot_three_side_by_side(df1, df2, df3, titles=("Recall@20","Recall@50","NDCG
         
         fig.update_yaxes(title_text="", row=1, col=i)
         fig.update_xaxes(type="category", categoryorder="array",
-                     categoryarray=cat_str, tickangle=0, title_text="nnz",
+                     categoryarray=cat_str, tickangle=0, title_text=xcol,
                      row=1, col=i)
 
     fig.update_layout(
@@ -157,16 +157,17 @@ def plot_three_side_by_side(df1, df2, df3, titles=("Recall@20","Recall@50","NDCG
 def normalize_x_as_reversed_categories(*dfs, xcol="nnz"):
     # collect all x values across dfs, make one global reversed order
     cats = sorted(
-        {int(v) for df in dfs for v in df[xcol].unique()},
-        reverse=True
+        {int(v) for df in dfs for v in [int(float(x)) for x in dfs[0][xcol].unique()]},
+        reverse=True if xcol=="nnz" else False
     )
     cat_str = [str(v) for v in cats]
 
     out = []
     for df in dfs:
+        print(df)
         df = df.copy()
         df["nnz_cat"] = pd.Categorical(
-            df[xcol].astype(int).astype(str),
+            df[xcol].astype(float).astype(int).astype(str),
             categories=cat_str,
             ordered=True
         )
