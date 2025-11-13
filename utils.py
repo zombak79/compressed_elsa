@@ -104,7 +104,7 @@ def highlight_cells(x):
     return df_styled
 
 # plot three graphs
-def plot_three_side_by_side(df1, df2, df3, titles=("Recall@20","Recall@50","NDCG@100"), baselines=[None, None, None], legend_title_text="Method", xcol="nnz"):
+def plot_three_side_by_side(df1, df2, df3, titles=("Recall@20","Recall@50","NDCG@100"), baselines=[None, None, None], legend_title_text="Method", xcol="nnz", baselines_2=None):
     # Collect method names (all columns except 'nnz')
     # normalize once
     (df1, df2, df3), cat_str = normalize_x_as_reversed_categories(
@@ -164,7 +164,6 @@ def normalize_x_as_reversed_categories(*dfs, xcol="nnz"):
 
     out = []
     for df in dfs:
-        print(df)
         df = df.copy()
         df["nnz_cat"] = pd.Categorical(
             df[xcol].astype(float).astype(int).astype(str),

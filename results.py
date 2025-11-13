@@ -77,7 +77,8 @@ column_config = {
 toc.append(st, "Results for GoodBooks-10k", "gb10k")
 
 st.dataframe(goodbooks_df.reset_index(drop=True).style.apply(highlight_cells, axis=None), width="content", row_height=25, height=int(3+25)*len(goodbooks_df), column_config=column_config)
-fig = plot_three_side_by_side(goodbooks_recall_20_df, goodbooks_recall_50_df, goodbooks_ndcg_100_df, baselines=goodbooks_df[goodbooks_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
+
+fig = plot_three_side_by_side(goodbooks_recall_20_df, goodbooks_recall_50_df, goodbooks_ndcg_100_df, baselines=goodbooks_df[goodbooks_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), baselines_2=goodbooks_df[goodbooks_df.method=="ease"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
 st.plotly_chart(fig, use_container_width=True)
 
 fig = plot_three_side_by_side(goodbooks_recall_20_elsa_df, goodbooks_recall_50_elsa_df, goodbooks_ndcg_100_elsa_df, baselines=goodbooks_df[goodbooks_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), legend_title_text="Factors", xcol="compression_rate")
