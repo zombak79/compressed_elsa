@@ -45,7 +45,7 @@ def load_idx():
 @st.cache_data
 def get_test_users():
     X = sparse.load_npz("data/gb10_test_users.npz")
-    return X
+    return X[::-1]
 
 @st.cache_data
 def get_A():

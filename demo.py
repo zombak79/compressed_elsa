@@ -36,7 +36,7 @@ with st.sidebar:
     user_index = st.selectbox(
         label="Select a user from the test set", 
         options=np.arange(X_test.shape[0]), 
-        index=1488
+        index=1012
     )
     user = X_test[user_index]
 
