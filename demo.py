@@ -36,7 +36,7 @@ with st.sidebar:
     user_index = st.selectbox(
         label="Select a user from the test set", 
         options=np.arange(X_test.shape[0]), 
-        index=1012
+        index=1011
     )
     user = X_test[user_index]
 
@@ -44,6 +44,7 @@ with st.sidebar:
     show_analysis = st.checkbox("Show latent space analysis", value=True)
 
     only_active = st.checkbox("Show only latents for matching segments", value=True, disabled=not show_analysis)
+    sort_latents = st.checkbox("Sort latents by matching segments", value=True, disabled=not only_active)
 
     # checkbox to show/hide user history
     show_user_history = st.checkbox("Show user history", value=False)
@@ -65,7 +66,14 @@ recommended_items=rec.recommend_items(user, k=k)
 recommended_segments = rec.recommend_segments(user, k=num_segments)
 
 if show_analysis:
-    fig=rec.explore_user_segments(user, list(recommended_segments.keys()), user_index, scores=list(recommended_segments.values()) if show_scores else None, only_active=only_active)
+    fig=rec.explore_user_segments(
+        user, 
+        list(recommended_segments.keys()), 
+        user_index, 
+        scores=list(recommended_segments.values()) if show_scores else None, 
+        only_active=only_active,
+        sort_latents=sort_latents,
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 if show_user_history:
