@@ -4,28 +4,42 @@ from utils import TOC
 # prepare placeholder for table of contents
 toc = TOC(st.sidebar.empty())
 
-static_content = """
+st.markdown ("""## Efficient Learning of Sparse Representations from Interactions
 
-# Intro
+This mini-page accompanies our paper [link TBA] and provides all experiments, ablations, and visualizations that 
+could not fit into the manuscript. The source code is at https://github.com/zombak79/compressed_elsa. The source 
+code for this site is in the branch "demo".
+""")
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse quis tincidunt nibh. Sed eleifend, mi ultricies hendrerit iaculis, ligula nibh ornare massa, quis tincidunt felis dui sit amet metus. Vivamus a mollis orci. Quisque quis mi ac nisl ullamcorper fermentum in consectetur ipsum. Ut sagittis consectetur nisl consequat sodales. Donec a efficitur erat. In sodales est nec eros commodo, ac feugiat quam congue. Nam metus lorem, semper a luctus et, condimentum vel quam. Aliquam tincidunt fermentum mollis.
+st.markdown("""### Abstract""")
 
-## One
+st.markdown("""
+Recommender systems rely on embeddings learned from interactions that capture meaningful 
+behavioral patterns. In practice, however, the retrieval stage faces a persistent tension: dense 
+embeddings are expressive but expensive to store and serve at scale, while compact representations risk 
+losing essential signal. This tradeoff makes it difficult to build retrieval models that are both fast 
+and accurate.
 
-Nulla vestibulum convallis odio, eget pharetra mi laoreet a. Morbi at felis sollicitudin, fermentum felis et, ornare nibh. Vivamus tincidunt in neque at elementum. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In hendrerit commodo porttitor. Pellentesque lobortis vel diam et sagittis. Proin nec posuere libero. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In faucibus mi eget sem euismod, ac rhoncus ex interdum. Integer ut metus pulvinar felis vulputate dignissim sed ultrices purus. Aenean feugiat faucibus leo sit amet convallis. Aliquam vel aliquet nunc. Donec dignissim arcu ut turpis sodales, sed ultrices justo consectetur. Vestibulum vestibulum odio diam, at placerat elit tincidunt ut.
+Our approach takes inspiration from recent work on sparse embedding compression. Instead of compressing 
+dense vectors after training, we train high-dimensional sparse embeddings directly, preserving expressive 
+capacity while keeping memory and latency low. Applied to the production-grade ELSA autoencoder, this 
+strategy yields up to 10× smaller embeddings with no accuracy loss, and up to 100× compression with 
+only a 2.5% drop.
 
-## Two
+A further benefit emerges from the sparsity itself: the active dimensions form a natural inverted-index 
+structure that groups items into coherent semantic segments aligned with the model’s latent space. This 
+makes it possible to expose interpretable segments and support segment-level recommendations (such 
+as 2D homepage layouts) directly within the retrieval layer.""")
 
-Morbi tempor lobortis elit, in rutrum velit iaculis quis. Etiam varius sem at nibh placerat efficitur. Aenean risus urna, commodo eget nisl et, tempus imperdiet sem. Etiam ultrices eros dui, in tristique diam mattis id. Quisque lobortis vestibulum ante, non elementum lacus. Integer dignissim lacus fermentum vehicula dictum. Nullam eleifend et eros vel porta. Etiam est ante, dictum vitae placerat non, feugiat sed quam. Donec euismod condimentum orci, quis accumsan quam finibus id. Aenean rutrum pulvinar metus, a tristique tellus tincidunt vitae. Donec euismod nibh eget tristique mattis.
+st.markdown("""### Navigation""")  
+st.markdown("""
+This page is organised as follows:
 
-## Three Lines
+- In Results, you’ll find extended tables, pruning-schedule ablations, embedding-size comparisons, and additional metrics.
+- In Live Demo, you can interact with the latent space: select a user, inspect their sparse activations, explore discovered segments, and see how recommendations change in real time.
+""")
 
-In dui quam, lobortis ut libero et, consequat dapibus lectus. Curabitur in purus sem. Sed in orci porttitor justo convallis tempus. Donec eget sapien id mauris aliquet semper. Mauris porta quam non sem placerat, vitae laoreet leo iaculis. Fusce sapien urna, mattis ut orci sit amet, tristique blandit orci. Aenean pretium ex tincidunt condimentum iaculis. Curabitur mi nisl, consequat vel libero at, semper fringilla 
+st.markdown("""### Citation""")  
+st.markdown("""TBA""")  
 
-"""
-toc.append_md(static_content)
-
-st.markdown(static_content)
-
-# render table of content
 toc()

@@ -26,6 +26,9 @@ toc = TOC(st.sidebar.empty())
 
 # start the document
 toc.append(st, "Live Demo", "demo")
+
+st.markdown("This demo illustrates how Compressed ELSA activates sparse latent factors for a user and how these activations correspond to interpretable segments and recommended items. Use the controls on the left to switch users and toggle analysis options; the visualization updates instantly.")
+
 items = items.set_index(items.book_id.astype(str))
 
 # init recommender
@@ -120,5 +123,5 @@ for recommended_segment, score in recommended_segments.items():
     )
 
 # render table of content
-toc()
+# toc()
 
