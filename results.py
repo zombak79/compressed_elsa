@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 from utils import *
+from tables import *
 import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.subplots as sp
@@ -76,18 +77,29 @@ column_config = {
 # section with results for goodbooks
 toc.append(st, "Results for GoodBooks-10k", "gb10k")
 
-st.dataframe(goodbooks_df.reset_index(drop=True).style.apply(highlight_cells, axis=None), width="content", row_height=25, height=int(3+25)*len(goodbooks_df), column_config=column_config)
+toc.append(st, "Experimental results", "gb10k_exp", 1)
 
-fig = plot_three_side_by_side(goodbooks_recall_20_df, goodbooks_recall_50_df, goodbooks_ndcg_100_df, baselines=goodbooks_df[goodbooks_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), baselines_2=goodbooks_df[goodbooks_df.method=="ease"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
+st.markdown(gb_main , unsafe_allow_html=True)
+
+
+toc.append(st, "Pruning strategies", "gb10k_prun", 1)
+st.markdown(gb_pruning_strategy , unsafe_allow_html=True)
+
+#st.dataframe(goodbooks_df.reset_index(drop=True).style.apply(highlight_cells, axis=None), width="content", row_height=25, height=int(3+25)*len(goodbooks_df), column_config=column_config)
+
+#fig = plot_three_side_by_side(goodbooks_recall_20_df, goodbooks_recall_50_df, goodbooks_ndcg_100_df, baselines=goodbooks_df[goodbooks_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), baselines_2=goodbooks_df[goodbooks_df.method=="ease"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
+#st.plotly_chart(fig, use_container_width=True)
+
+#fig = plot_three_side_by_side(goodbooks_recall_20_elsa_df, goodbooks_recall_50_elsa_df, goodbooks_ndcg_100_elsa_df, baselines=goodbooks_df[goodbooks_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), legend_title_text="Factors", xcol="compression_rate")
+#st.plotly_chart(fig, use_container_width=True)
+fig = plot_three_side_by_side(goodbooks_recall_20_lth_df, goodbooks_recall_50_lth_df, goodbooks_ndcg_100_lth_df, baselines=goodbooks_df[goodbooks_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
 st.plotly_chart(fig, use_container_width=True)
 
-fig = plot_three_side_by_side(goodbooks_recall_20_elsa_df, goodbooks_recall_50_elsa_df, goodbooks_ndcg_100_elsa_df, baselines=goodbooks_df[goodbooks_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), legend_title_text="Factors", xcol="compression_rate")
-st.plotly_chart(fig, use_container_width=True)
+
+toc.append(st, "Initial embedding sizes", "gb10k_factors", 1)
+st.markdown(gb_factors , unsafe_allow_html=True)
 
 fig = plot_three_side_by_side(goodbooks_factors_recall_20_df, goodbooks_factors_recall_50_df, goodbooks_factors_ndcg_100_df, baselines=goodbooks_df[goodbooks_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), legend_title_text="Factors")
-st.plotly_chart(fig, use_container_width=True)
-
-fig = plot_three_side_by_side(goodbooks_recall_20_lth_df, goodbooks_recall_50_lth_df, goodbooks_ndcg_100_lth_df, baselines=goodbooks_df[goodbooks_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
 st.plotly_chart(fig, use_container_width=True)
 
 

@@ -278,7 +278,10 @@ class TOC:
 
     def append(self, object: Any, name:str, anchor:str, indent:int=0):
         if object:
-            object.header(name, anchor=anchor)
+            if indent==0:
+                object.header(name, anchor=anchor)
+            else:
+                object.subheader(name, anchor=anchor)
         self.toc.append(f"{'&nbsp;'*self.num_sep*indent}[{name}](#{anchor})")
 
 
