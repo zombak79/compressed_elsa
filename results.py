@@ -105,13 +105,16 @@ st.plotly_chart(fig, use_container_width=True)
 
 # section with results for movielens
 toc.append(st, "Results for MovieLens-20M", "ml20m")
+toc.append(st, "Experimental results", "ml20m_exp", 1)
+st.markdown(ml_main , unsafe_allow_html=True)
 
-st.dataframe(ml20m_df.reset_index(drop=True).style.apply(highlight_cells, axis=None), width="content", row_height=25, height=int(3+25)*len(ml20m_df),column_config=column_config)
-fig = plot_three_side_by_side(ml20m_recall_20_df, ml20m_recall_50_df, ml20m_ndcg_100_df, baselines=ml20m_df[ml20m_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
-st.plotly_chart(fig, use_container_width=True)
 
-fig = plot_three_side_by_side(ml20m_recall_20_elsa_df, ml20m_recall_50_elsa_df, ml20m_ndcg_100_elsa_df, baselines=ml20m_df[ml20m_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), legend_title_text="Factors", xcol="compression_rate")
-st.plotly_chart(fig, use_container_width=True)
+#st.dataframe(ml20m_df.reset_index(drop=True).style.apply(highlight_cells, axis=None), width="content", row_height=25, height=int(3+25)*len(ml20m_df),column_config=column_config)
+#fig = plot_three_side_by_side(ml20m_recall_20_df, ml20m_recall_50_df, ml20m_ndcg_100_df, baselines=ml20m_df[ml20m_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
+#st.plotly_chart(fig, use_container_width=True)
+
+#fig = plot_three_side_by_side(ml20m_recall_20_elsa_df, ml20m_recall_50_elsa_df, ml20m_ndcg_100_elsa_df, baselines=ml20m_df[ml20m_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), legend_title_text="Factors", xcol="compression_rate")
+#st.plotly_chart(fig, use_container_width=True)
 
 fig = plot_three_side_by_side(ml20m_recall_20_lth_df, ml20m_recall_50_lth_df, ml20m_ndcg_100_lth_df, baselines=ml20m_df[ml20m_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
 st.plotly_chart(fig, use_container_width=True) 
