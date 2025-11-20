@@ -52,6 +52,10 @@ ml20m_recall_20_lth_df=get_data("ml20m_recall_20_lth")
 ml20m_recall_50_lth_df=get_data("ml20m_recall_50_lth")
 ml20m_ndcg_100_lth_df=get_data("ml20m_ndcg_100_lth")
 
+ml20m_factors_recall_20_df=get_data("ml20m_factors_recall_20")
+ml20m_factors_recall_50_df=get_data("ml20m_factors_recall_50")
+ml20m_factors_ndcg_100_df=get_data("ml20m_factors_ndcg_100")
+
 
 # netflix prize
 netflix_df=get_data("netflix")
@@ -115,20 +119,29 @@ st.markdown(ml_main , unsafe_allow_html=True)
 
 #fig = plot_three_side_by_side(ml20m_recall_20_elsa_df, ml20m_recall_50_elsa_df, ml20m_ndcg_100_elsa_df, baselines=ml20m_df[ml20m_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), legend_title_text="Factors", xcol="compression_rate")
 #st.plotly_chart(fig, use_container_width=True)
+toc.append(st, "Pruning strategies", "ml20m_prun", 1)
+st.markdown(ml_pruning_strategy , unsafe_allow_html=True)
 
 fig = plot_three_side_by_side(ml20m_recall_20_lth_df, ml20m_recall_50_lth_df, ml20m_ndcg_100_lth_df, baselines=ml20m_df[ml20m_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
 st.plotly_chart(fig, use_container_width=True) 
+
+toc.append(st, "Initial embedding sizes", "ml20m_factors", 1)
+st.markdown(ml_factors, unsafe_allow_html=True)
+fig = plot_three_side_by_side(ml20m_factors_recall_20_df, ml20m_factors_recall_50_df, ml20m_factors_ndcg_100_df, baselines=ml20m_df[ml20m_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), legend_title_text="Factors")
+st.plotly_chart(fig, use_container_width=True)
+
+
 
 
 # section with results for goodbooks
 toc.append(st, "Results for Netflix prize", "netflix")
 
-st.dataframe(netflix_df.reset_index(drop=True).style.apply(highlight_cells, axis=None), width="content", row_height=25, height=int(3+25)*len(netflix_df),column_config=column_config)
-fig = plot_three_side_by_side(netflix_recall_20_df, netflix_recall_50_df, netflix_ndcg_100_df, baselines=netflix_df[netflix_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
-st.plotly_chart(fig, use_container_width=True)
+#st.dataframe(netflix_df.reset_index(drop=True).style.apply(highlight_cells, axis=None), width="content", row_height=25, height=int(3+25)*len(netflix_df),column_config=column_config)
+#fig = plot_three_side_by_side(netflix_recall_20_df, netflix_recall_50_df, netflix_ndcg_100_df, baselines=netflix_df[netflix_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
+#st.plotly_chart(fig, use_container_width=True)
 
-fig = plot_three_side_by_side(netflix_recall_20_elsa_df, netflix_recall_50_elsa_df, netflix_ndcg_100_elsa_df, baselines=netflix_df[netflix_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), legend_title_text="Factors", xcol="compression_rate")
-st.plotly_chart(fig, use_container_width=True)
+#fig = plot_three_side_by_side(netflix_recall_20_elsa_df, netflix_recall_50_elsa_df, netflix_ndcg_100_elsa_df, baselines=netflix_df[netflix_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), legend_title_text="Factors", xcol="compression_rate")
+#st.plotly_chart(fig, use_container_width=True)
 
 fig = plot_three_side_by_side(netflix_recall_20_lth_df, netflix_recall_50_lth_df, netflix_ndcg_100_lth_df, baselines=netflix_df[netflix_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
 st.plotly_chart(fig, use_container_width=True) 

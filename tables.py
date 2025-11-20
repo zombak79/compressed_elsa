@@ -549,3 +549,281 @@ ml_main = """<style type="text/css">
     <td class="tg-802b"><span style="font-weight:normal">0.378</span></td>
   </tr>
 </tbody></table>"""
+
+ml_pruning_strategy = """<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-style:solid;border-width:1px;font-size:14px;
+  overflow:hidden;padding:2px 5px;word-break:normal;}
+.tg th{border-style:solid;border-width:1px;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:5px 5px;word-break:normal;}
+.tg .tg-8rs4{text-align:right;vertical-align:bottom}
+.tg .tg-bobw{font-weight:bold;text-align:center;vertical-align:bottom}
+.tg .tg-njgq{font-style:italic;font-weight:bold;text-align:right;vertical-align:bottom}
+.tg .tg-7zrl{text-align:left;vertical-align:bottom}
+.tg .tg-j6zm{font-weight:bold;text-align:left;vertical-align:bottom}
+</style>
+<table class="tg"><thead>
+  <tr>
+    <th class="tg-7zrl"></th>
+    <th class="tg-bobw" colspan="5">Recall@20</th>
+    <th class="tg-bobw" colspan="5">Recall@50</th>
+    <th class="tg-bobw" colspan="5">NDCG@100</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td class="tg-j6zm"><span style="font-weight:bold">Vector size (bytes)</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">1024</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">512</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">256</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">128</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">64</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">1024</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">512</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">256</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">128</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">64</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">1024</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">512</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">256</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">128</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">64</span></td>
+  </tr>
+  <tr>
+    <td class="tg-7zrl">Exponential with restarting</td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.389</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.384</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.375</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.363</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.344</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.522</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.515</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.504</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.487</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.462</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.425</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.420</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.411</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.398</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.378</span></td>
+  </tr>
+  <tr>
+    <td class="tg-7zrl">Exponential</td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.387</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.381</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.372</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.360</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.341</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.519</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.511</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.499</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.483</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.458</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.424</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.418</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.408</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.395</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.375</span></td>
+  </tr>
+  <tr>
+    <td class="tg-7zrl">Linear with restarting</td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.389</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.383</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.372</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.358</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.333</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.522</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.515</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.500</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.480</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.449</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.426</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.420</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.408</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.392</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.366</span></td>
+  </tr>
+  <tr>
+    <td class="tg-7zrl">Linear</td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.386</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.380</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.371</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.359</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.341</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.518</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.510</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.498</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.482</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.458</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.423</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.417</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.407</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.393</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.375</span></td>
+  </tr>
+  <tr>
+    <td class="tg-7zrl">Step-wise with restarting</td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.386</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.379</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.369</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.354</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.331</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.517</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.508</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.495</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.476</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.446</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.421</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.415</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.404</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.389</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.365</span></td>
+  </tr>
+  <tr>
+    <td class="tg-7zrl">Step-wise</td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.386</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.380</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.371</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.359</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.340</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.518</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.510</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.498</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.482</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.457</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.422</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.416</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.406</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.394</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.373</span></td>
+  </tr>
+  <tr>
+    <td class="tg-7zrl">Constant</td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.385</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.376</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.365</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.350</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.323</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.518</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.506</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.491</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.471</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.436</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.422</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.413</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.401</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.386</span></td>
+    <td class="tg-8rs4"><span style="font-weight:normal">0.357</span></td>
+  </tr>
+</tbody></table>"""
+
+ml_factors = """<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-size:14px;
+  overflow:hidden;padding:2px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:5px 5px;word-break:normal;}
+.tg .tg-njgq{font-style:italic;font-weight:bold;text-align:right;vertical-align:bottom}
+.tg .tg-0xmo{;text-align:right;vertical-align:bottom}
+.tg .tg-7zrl{text-align:left;vertical-align:bottom}
+.tg .tg-8d8j{text-align:center;vertical-align:bottom}
+.tg .tg-j6zm{font-weight:bold;text-align:left;vertical-align:bottom}
+</style>
+<table class="tg"><thead>
+  <tr>
+    <th class="tg-7zrl"></th>
+    <th class="tg-8d8j" colspan="5">Recall@20</th>
+    <th class="tg-8d8j" colspan="5">Recall@50</th>
+    <th class="tg-8d8j" colspan="5">NDCG@100</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td class="tg-j6zm"><span style="font-weight:bold">Vector size (bytes)</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">1024</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">512</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">256</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">128</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">64</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">1024</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">512</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">256</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">128</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">64</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">1024</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">512</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">256</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">128</span></td>
+    <td class="tg-njgq"><span style="font-weight:bold;font-style:italic">64</span></td>
+  </tr>
+  <tr>
+    <td class="tg-7zrl">64 kB</td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.386</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.380</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.370</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.356</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.333</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.517</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.509</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.495</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.478</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.448</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.386</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.380</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.370</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.356</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.333</span></td>
+  </tr>
+  <tr>
+    <td class="tg-7zrl">48 kB</td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.388</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.382</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.373</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.360</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.340</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.520</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.513</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.500</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.482</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.456</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.388</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.382</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.373</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.360</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.340</span></td>
+  </tr>
+  <tr>
+    <td class="tg-7zrl">32 kB</td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.389</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.384</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.375</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.363</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.344</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.522</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.515</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.504</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.487</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.462</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.389</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.384</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.375</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.363</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.344</span></td>
+  </tr>
+  <tr>
+    <td class="tg-7zrl">16kB</td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.384</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.376</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.364</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.345</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.313</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.517</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.507</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.489</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.464</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.423</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.384</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.376</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.364</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.345</span></td>
+    <td class="tg-0xmo"><span style="font-weight:normal;">0.313</span></td>
+  </tr>
+</tbody></table>"""
