@@ -4,7 +4,7 @@ import argparse
 from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
 import numpy as np
 from recommenders.baselines import EASERecommender
-from recommenders.utils.layers import CompressedSparseLayerELSA
+from recommenders.core.layers import CompressedSparseLayerELSA
 from _datasets.config import config
 
 from time import time

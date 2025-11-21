@@ -6,7 +6,7 @@ os.environ["KERAS_BACKEND"] = "torch"
 import keras
 
 
-from recommenders.utils.layers import LayerELSA, SparseLayerELSA, CompressedSparseLayerELSA
+from recommenders.core.layers import LayerELSA, SparseLayerELSA, CompressedSparseLayerELSA
 from _datasets.pydatasets import BasicRecSysDataset, PredictDfRecSysDataset
 import numpy as np
 from tqdm import tqdm
