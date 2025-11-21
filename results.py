@@ -68,6 +68,11 @@ netflix_recall_20_elsa_df=get_data("netflix_recall_20_elsa")
 netflix_recall_50_elsa_df=get_data("netflix_recall_50_elsa")
 netflix_ndcg_100_elsa_df=get_data("netflix_ndcg_100_elsa")
 
+netflix_factors_recall_20_df=get_data("netflix_factors_recall_20")
+netflix_factors_recall_50_df=get_data("netflix_factors_recall_50")
+netflix_factors_ndcg_100_df=get_data("netflix_factors_ndcg_100")
+
+
 netflix_recall_20_lth_df=get_data("netflix_recall_20_lth")
 netflix_recall_50_lth_df=get_data("netflix_recall_50_lth")
 netflix_ndcg_100_lth_df=get_data("netflix_ndcg_100_lth")
@@ -135,19 +140,80 @@ st.plotly_chart(fig, use_container_width=True)
 
 # section with results for goodbooks
 toc.append(st, "Results for Netflix prize", "netflix")
+st.markdown(netflix_main, unsafe_allow_html=True)
 
-#st.dataframe(netflix_df.reset_index(drop=True).style.apply(highlight_cells, axis=None), width="content", row_height=25, height=int(3+25)*len(netflix_df),column_config=column_config)
-#fig = plot_three_side_by_side(netflix_recall_20_df, netflix_recall_50_df, netflix_ndcg_100_df, baselines=netflix_df[netflix_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
-#st.plotly_chart(fig, use_container_width=True)
-
-#fig = plot_three_side_by_side(netflix_recall_20_elsa_df, netflix_recall_50_elsa_df, netflix_ndcg_100_elsa_df, baselines=netflix_df[netflix_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), legend_title_text="Factors", xcol="compression_rate")
-#st.plotly_chart(fig, use_container_width=True)
-
+toc.append(st, "Pruning strategies", "netflix_prun", 1)
+st.markdown(netflix_pruning_startegy, unsafe_allow_html=True)
 fig = plot_three_side_by_side(netflix_recall_20_lth_df, netflix_recall_50_lth_df, netflix_ndcg_100_lth_df, baselines=netflix_df[netflix_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list())
 st.plotly_chart(fig, use_container_width=True) 
 
+toc.append(st, "Initial embedding sizes", "netflix_factors", 1)
+st.markdown(netflix_factors, unsafe_allow_html=True)
+fig = plot_three_side_by_side(netflix_factors_recall_20_df,netflix_factors_recall_50_df, netflix_factors_ndcg_100_df, baselines=netflix_df[netflix_df.method=="baseline"][["recall@20",	"recall@50",	"ndcg@100"]].iloc[0].to_list(), legend_title_text="Factors")
+st.plotly_chart(fig, use_container_width=True)
+
 # section on interpretability
 toc.append(st, "Interpretability", "interpretability")
+
+st.markdown("""
+We used `gpt-4.1-nano-2025-04-14` model via standard OpenAI API with `temperature` parameter set to 0.
+""")
+
+toc.append(st, "Naming segments", "naming", 1)
+st.markdown("""
+Prompt for naming the most significant latents:
+```
+You are given a list of books, each with title, author, year, and description.
+
+1. Identify the most common concept that links all the books (an author, genre, theme, 
+   or hybrid such as romantic sci-fi).
+2. Convert that concept into a segment name suitable for a recommendation system.
+
+The segment name must be title-case, concise (2-3 words), and sound natural — like a content 
+category (e.g., Romantic Comedies, Cyberpunk Thrillers, Classic Mysteries).
+
+Output: Only the final segment name, nothing else.
+
+Books:
+```
+
+""")
+
+toc.append(st, "Merging segments", "merging", 1)
+
+st.markdown("""
+First, we compute embeddings for segments with the `thenlper/gte-large` sentence transformer model, available 
+at [HugginFace](https://huggingface.co/thenlper/gte-large). Then, we merged segments with similarity score>=0.95 
+with the following prompt:
+```
+You are given several segment names that describe similar types of content.
+Merge them into one unified segment name that sounds natural and general enough to cover all of them.
+
+The final name must be:
+• Title-case (each main word capitalized)
+• 2-3 words maximum
+• Natural and human-friendly (like a content category)
+
+Output: Only the final merged segment name.
+
+Example Input: ["Supernatural Romance", "Supernatural Series", "Supernatural Urban Fantasy",
+ "Supernatural Fiction", "Supernatural Romance", "Paranormal Romance",
+ "Supernatural Fantasy", "Supernatural Suspense"]
+
+Example Output
+
+Supernatural Romance
+
+Segments:
+```
+
+""")
+
+toc.append(st, "Explore discovered segments", "explore", 1)
+
+st.markdown("""
+Here, you can explore the resulting segments. First, select a segment from the final list.
+""")
 
 items = get_items("gb10")
 its=[
@@ -159,6 +225,7 @@ its=[
     "description": row.mistral_7b[:225]+"...",
 } for i,row in items.iterrows()
 ]
+
 
 segments = load_gb_segments()
 segs = {}
@@ -178,6 +245,10 @@ ALL = {it["id"]: it for seg in segs.values() for it in seg}
 
 seg=st.selectbox("Select segment", options=list(segs.keys()))
 
+st.markdown("""
+Now, explore the original segemnts that was merged into the final segment selected above.
+""")
+
 sdf=pd.DataFrame(zip(segments[seg]["similar"], segments[seg]["descriptions"]))
 sdf.columns=["latent", "name"]
 
@@ -190,6 +261,10 @@ st.dataframe(
         "name": st.column_config.Column("Name", width="large")
     }
 )
+
+st.markdown("""
+Finally, see items assigned by the selected segment.
+""")
 
 for idx, (seg_title, items) in enumerate(segs.items(), start=1):
     if seg_title==seg:
