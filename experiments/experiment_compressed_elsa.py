@@ -1,26 +1,24 @@
-import os
-import torch
 import argparse
-import subprocess
 import gc
+import os
+import subprocess
+import sys
+from time import time
 
-os.environ["KERAS_BACKEND"] = "torch"
-
-import keras
-
-from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
 import numpy as np
 import pandas as pd
-
-from _datasets.pydatasets import BasicRecSysDataset, SparseRecSysDataset, SparseRecSysDatasetWithNegatives
-
-from recommenders.elsa_models import KerasELSA, SparseKerasELSA, NMSE, CompressedSparseKerasELSA
-
-from _datasets.config import config
-
-from time import time
-from keras.optimizers import Nadam as NadamS
 from scipy.sparse import save_npz, csr_matrix
+import torch
+
+os.environ["KERAS_BACKEND"] = "torch"
+import keras
+from keras.optimizers import Nadam as NadamS
+
+sys.path.insert(0, ".")
+from _datasets.config import config
+from _datasets.pydatasets import BasicRecSysDataset, SparseRecSysDataset, SparseRecSysDatasetWithNegatives
+from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
+from recommenders.elsa_models import KerasELSA, SparseKerasELSA, NMSE, CompressedSparseKerasELSA
 
 parser = argparse.ArgumentParser()
 

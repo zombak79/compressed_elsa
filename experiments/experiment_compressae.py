@@ -1,24 +1,22 @@
-import os
-import torch
 import argparse
+import os
 import subprocess
-
-os.environ["KERAS_BACKEND"] = "torch"
-
-import keras
-
-from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
-import numpy as np
-import pandas as pd
-
-
-from recommenders.elsa_models import CompressedSparseKerasELSA
-
-from _datasets.config import config
-
+import sys
 from time import time
 
+import numpy as np
+import pandas as pd
+import torch
+
+os.environ["KERAS_BACKEND"] = "torch"
+import keras
+
+sys.path.insert(0, ".")
+from _datasets.config import config
+from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
 from recommenders.core.compressae import CompresSAE, train, make_loaders
+from recommenders.elsa_models import CompressedSparseKerasELSA
+
 
 parser = argparse.ArgumentParser()
 

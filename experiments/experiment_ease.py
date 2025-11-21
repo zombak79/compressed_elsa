@@ -1,15 +1,17 @@
 import os
 import argparse
+import sys
+from time import time
 
-from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
 import numpy as np
+import pandas as pd
+import torch
+
+sys.path.insert(0, ".")
+from _datasets.config import config
+from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
 from recommenders.baselines import EASERecommender
 from recommenders.core.layers import CompressedSparseLayerELSA
-from _datasets.config import config
-
-from time import time
-import torch
-import pandas as pd
 
 parser = argparse.ArgumentParser()
 

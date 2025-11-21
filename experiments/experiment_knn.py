@@ -1,12 +1,15 @@
-import os
 import argparse
-from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
+import os
+import sys
+
 import numpy as np
 import pandas as pd
 import torch
-from recommenders.baselines import KNNRecommender
 
+sys.path.insert(0, ".")
 from _datasets.config import config
+from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
+from recommenders.baselines import KNNRecommender
 
 parser = argparse.ArgumentParser()
 

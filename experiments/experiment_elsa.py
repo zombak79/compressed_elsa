@@ -1,24 +1,22 @@
-import os
-import torch
 import argparse
+import os
 import subprocess
+import sys
+from time import time
 
-os.environ["KERAS_BACKEND"] = "torch"
-
-import keras
-
-from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
 import numpy as np
 import pandas as pd
+import torch
 
-from _datasets.pydatasets import BasicRecSysDataset, SparseRecSysDataset, SparseRecSysDatasetWithNegatives
-
-from recommenders.elsa_models import KerasELSA, SparseKerasELSA, NMSE
-
-from _datasets.config import config
-
-from time import time
+os.environ["KERAS_BACKEND"] = "torch"
+import keras
 from keras.optimizers import Nadam as NadamS
+
+sys.path.insert(0, ".")
+from _datasets.config import config
+from _datasets.pydatasets import BasicRecSysDataset, SparseRecSysDataset, SparseRecSysDatasetWithNegatives
+from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
+from recommenders.elsa_models import KerasELSA, SparseKerasELSA, NMSE
 
 parser = argparse.ArgumentParser()
 
@@ -62,7 +60,6 @@ parser.add_argument("--tuning", default="False", type=str, help="flag for using 
 parser.add_argument("--top_k", default=1500, type=int, help="Top k of prdictions considered during training. Works only in finetuning mode.")
 
 parser.add_argument("--save", default="False", type=str, help="whether to save a model")
-
 
 args = parser.parse_args([] if "__file__" not in globals() else None)
 
