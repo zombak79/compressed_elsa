@@ -3,6 +3,21 @@ import torch
 import argparse
 import subprocess
 
+import keras
+
+from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
+import numpy as np
+import pandas as pd
+
+from _datasets.pydatasets import BasicRecSysDataset, SparseRecSysDataset, SparseRecSysDatasetWithNegatives
+
+from recommenders.elsa_models import KerasELSA, SparseKerasELSA, NMSE
+
+from _datasets.config import config
+
+from time import time
+from keras.optimizers import Nadam as NadamS
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--seed", default=42, type=int, help="Random seed")
@@ -12,12 +27,12 @@ parser.add_argument("--device", default=0, type=int, help="Default device to run
 parser.add_argument("--factors", default=64, type=int, help="Number of model factors")
 parser.add_argument("--batch_size", default=256, type=int, help="Batch size for model training")
 
-parser.add_argument("--lr", default=.1, type=float, help="Learning rate for model training, only if scheduler is none")
+parser.add_argument("--lr", default=0.1, type=float, help="Learning rate for model training, only if scheduler is none")
 parser.add_argument("--scheduler", default="none", type=str, help="Scheduler: LinearWarmup or none")
-parser.add_argument("--init_lr", default=.001, type=float, help="starting lr, only if scheduler is not none")
-parser.add_argument("--warmup_lr", default=.1, type=float, help="max warmup lr, only if scheduler is not none")
-parser.add_argument("--target_lr", default=.001, type=float, help="final lr, only if scheduler is not none")
-parser.add_argument("--weight_decay", default=0., type=float, help="weight decay for l2 regularozation of weights during training")
+parser.add_argument("--init_lr", default=0.001, type=float, help="starting lr, only if scheduler is not none")
+parser.add_argument("--warmup_lr", default=0.1, type=float, help="max warmup lr, only if scheduler is not none")
+parser.add_argument("--target_lr", default=0.001, type=float, help="final lr, only if scheduler is not none")
+parser.add_argument("--weight_decay", default=0.0, type=float, help="weight decay for l2 regularozation of weights during training")
 
 parser.add_argument("--epochs", default=10, type=int, help="Total epochs of model training")
 parser.add_argument("--warmup_epochs", default=2, type=int, help="Number of epochs warming up during model training")
@@ -50,29 +65,9 @@ parser.add_argument("--save", default="False", type=str, help="whether to save a
 args = parser.parse_args([] if "__file__" not in globals() else None)
 
 os.environ["KERAS_BACKEND"] = "torch"
-os.environ["CUDA_VISIBLE_DEVICES"]=f"{args.device}"
+os.environ["CUDA_VISIBLE_DEVICES"] = f"{args.device}"
 
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-import math 
-import keras
-
-from _datasets.utils import *
-
-from optimizers import NadamS
-from schedules import LinearWarmup
-from _datasets.pydatasets import BasicRecSysDataset, PredictDfRecSysDataset, SparseRecSysDataset, SparseRecSysDatasetWithNegatives
-
-from layers import LayerELSA
-from models import KerasELSA, SparseKerasELSA, NMSE
-
-from config import config
-
-from time import time
-from keras.optimizers import Nadam as NadamS
-
-
-
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 if __name__ == "__main__":
@@ -80,7 +75,7 @@ if __name__ == "__main__":
     if not os.path.exists(folder):
         os.makedirs(folder)
     vargs = vars(args)
-    vargs["cuda_or_cpu"]=DEVICE
+    vargs["cuda_or_cpu"] = DEVICE
     pd.Series(vargs).to_csv(f"{folder}/setup.csv")
     print(folder)
     torch.manual_seed(args.seed)
@@ -92,125 +87,119 @@ if __name__ == "__main__":
     except:
         print(f"Dataset must be one of {list(config.keys())}.")
         raise
-    
+
     dataset, params = config[args.dataset]
-    params['random_state'] = args.seed
+    params["random_state"] = args.seed
     print(f"Loding dataset {args.dataset} with params {params}")
     dataset.load_interactions(**params)
     print(dataset)
-    
+
     if args.validation == "true":
         print("creating validation evaluator")
         val_evaluator = Evaluation(dataset, "validation")
-        df = fast_pruning(dataset.train_interactions, args.pu,args.pi)
+        df = fast_pruning(dataset.train_interactions, args.pu, args.pi)
     else:
-        df = fast_pruning(dataset.full_train_interactions, args.pu,args.pi)
-    
+        df = fast_pruning(dataset.full_train_interactions, args.pu, args.pi)
+
     X = get_sparse_matrix_from_dataframe(df)
-    
+
     print(f"Interaction matrix: {repr(X)}")
-    
+
     print("creating test evaluator")
     test_evaluator = Evaluation(dataset, "test")
-    
+
     print()
     print(f"Creating model {args.model} with strategy {args.model_strategy}")
-    
-    
 
-    if args.scheduler == "LinearWarmup":
-        lr = LinearWarmup(
-            warmup_steps=len(data_loader)*args.warmup_epochs,
-            decay_steps=len(data_loader)*args.decay_epochs,
-            starting_lr=args.init_lr, 
-            warmup_lr=args.warmup_lr, 
-            final_lr=args.target_lr, 
-        )
-    else:
-        print(f"Using constant lr of {args.lr}")
-        lr = args.lr
-    
+    print(f"Using constant lr of {args.lr}")
+    lr = args.lr
+
     # ELSA SECTION
     if args.model == "elsa" and args.model_strategy == "dense":
-        data_loader = BasicRecSysDataset(X, args.batch_size, shuffle=args.shuffle, workers=args.workers, use_multiprocessing=args.use_multiprocessing, max_queue_size=args.max_queue_size)
+        data_loader = BasicRecSysDataset(
+            X, args.batch_size, shuffle=args.shuffle, workers=args.workers, use_multiprocessing=args.use_multiprocessing, max_queue_size=args.max_queue_size
+        )
         model = KerasELSA(X.shape[1], args.factors, df.item_id.cat.categories, device=DEVICE)
         model.to(DEVICE)
         model.compile(optimizer=NadamS(learning_rate=lr, weight_decay=args.weight_decay), loss=NMSE, metrics=[keras.metrics.CosineSimilarity()])
         model.train_step(data_loader[0])
     if args.model == "elsa" and args.model_strategy == "sparse":
-        data_loader = SparseRecSysDataset(X, args.batch_size, shuffle=args.shuffle, workers=args.workers, use_multiprocessing=args.use_multiprocessing, max_queue_size=args.max_queue_size)
+        data_loader = SparseRecSysDataset(
+            X, args.batch_size, shuffle=args.shuffle, workers=args.workers, use_multiprocessing=args.use_multiprocessing, max_queue_size=args.max_queue_size
+        )
         model = SparseKerasELSA(X.shape[1], args.factors, df.item_id.cat.categories, device=DEVICE)
         model.to(DEVICE)
         model.compile(optimizer=NadamS(learning_rate=lr, weight_decay=args.weight_decay), loss=NMSE, metrics=[keras.metrics.CosineSimilarity()])
         model.train_step(data_loader[0])
     if args.model == "elsa" and args.model_strategy == "super_sparse":
-        data_loader = SparseRecSysDatasetWithNegatives(X, device=DEVICE, batch_size=args.batch_size, shuffle=args.shuffle, workers=args.workers, use_multiprocessing=args.use_multiprocessing, max_queue_size=args.max_queue_size, max_output=args.max_output)
+        data_loader = SparseRecSysDatasetWithNegatives(
+            X,
+            device=DEVICE,
+            batch_size=args.batch_size,
+            shuffle=args.shuffle,
+            workers=args.workers,
+            use_multiprocessing=args.use_multiprocessing,
+            max_queue_size=args.max_queue_size,
+            max_output=args.max_output,
+        )
         model = SparseKerasELSA(X.shape[1], args.factors, df.item_id.cat.categories, device=DEVICE)
         model.to(DEVICE)
         model.compile(optimizer=NadamS(learning_rate=lr, weight_decay=args.weight_decay), loss=NMSE, metrics=[keras.metrics.CosineSimilarity()])
         model.train_step(data_loader[0])
-        if args.tuning=="True":
+        if args.tuning == "True":
             print(f"Using finetuning with top_k={args.top_k}")
             model.top_k = args.top_k
             model.finetuning = True
     fits = []
     val_logs = []
-    train_time=0
-    if args.validation == "true": 
+    train_time = 0
+    if args.validation == "true":
         for i in range(args.epochs):
             print(i)
             start = time()
             f = model.fit(data_loader, epochs=1, verbose=2)
-            train_epoch_time = time()-start
-            train_time+=train_epoch_time
+            train_epoch_time = time() - start
+            train_time += train_epoch_time
             fits.append(f)
             val_df_preds = model.predict_df(val_evaluator.test_src)
-            val_results=val_evaluator(val_df_preds)
+            val_results = val_evaluator(val_df_preds)
             print(val_results)
             val_logs.append(val_results)
         dff = pd.DataFrame(val_logs)
-        dff["epoch"] = np.arange(dff.shape[0])+1
-        dff[list(dff.columns[-1:])+list(dff.columns[:-1])]
+        dff["epoch"] = np.arange(dff.shape[0]) + 1
+        dff[list(dff.columns[-1:]) + list(dff.columns[:-1])]
         dff.to_csv(f"{folder}/val_logs.csv")
         print("val_logs file written")
     else:
         start = time()
         f = model.fit(data_loader, epochs=args.epochs, verbose=2)
-        train_time = time()-start
+        train_time = time() - start
         fits.append(f)
 
-    if args.save=='True':
+    if args.save == "True":
         A = model.ELSA.A.cpu().detach().numpy()
-        np.save(f"{args.dataset}_f{args.factors}_s{args.seed}",A)
+        np.save(f"{args.dataset}_f{args.factors}_s{args.seed}", A)
 
-    
     df_preds = model.predict_df(test_evaluator.test_src)
-    results=test_evaluator(df_preds)
-    
+    results = test_evaluator(df_preds)
+
     print(results)
-    ks = list(f.history.keys())    
-    dc = {k:np.array([(f.history[k]) for f in fits]).flatten() for k in ks}
-    dc["epoch"] = np.arange(len(dc[list(dc.keys())[0]]))+1
+    ks = list(f.history.keys())
+    dc = {k: np.array([(f.history[k]) for f in fits]).flatten() for k in ks}
+    dc["epoch"] = np.arange(len(dc[list(dc.keys())[0]])) + 1
     df = pd.DataFrame(dc)
-    df[list(df.columns[-1:])+list(df.columns[:-1])]
-    
+    df[list(df.columns[-1:]) + list(df.columns[:-1])]
+
     df.to_csv(f"{folder}/history.csv")
     print("history file written")
-    
+
     pd.Series(results).to_csv(f"{folder}/result.csv")
     print("results file written")
-    
+
     pd.Series(train_time).to_csv(f"{folder}/timer.csv")
     print("timer written")
 
-    out = subprocess.check_output(
-        [
-            "nvidia-smi"
-        ]
-    )
-    
-    with open(os.path.join(f'{args.dataset}_{args.flag}.log'), 'w') as f:
+    out = subprocess.check_output(["nvidia-smi"])
+
+    with open(os.path.join(f"{args.dataset}_{args.flag}.log"), "w") as f:
         f.write(out.decode("utf-8"))
-    
-    
-    
