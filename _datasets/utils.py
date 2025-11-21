@@ -214,7 +214,7 @@ def fast_pruning(
 ) -> pd.DataFrame:
     stable = False
     step = 1
-    item_map, user_map, X = convert_user_item_pairs_into_sparse_matrix(interactions, "csr")
+    item_map, user_map, X = convert_user_item_pairs_into_sparse_matrix(interactions)
     X = X.astype(bool).T
     users_cnt_old = len(interactions["user_id"].cat.categories)
     items_cnt_old = len(interactions["item_id"].cat.categories)
@@ -282,7 +282,7 @@ def fast_pruning(
     return interactions
 
 
-def df_recall(self, df, targets, k):
+def df_recall(df, targets, k):
     df = df[df.value <= k]
     mat = get_sparse_matrix_from_dataframe(df, targets.item_id.cat.categories, targets.user_id.cat.categories)
     X_test_target = get_sparse_matrix_from_dataframe(targets, targets.item_id.cat.categories, targets.user_id.cat.categories)
@@ -291,7 +291,7 @@ def df_recall(self, df, targets, k):
     return (X_test_target.multiply(mat).astype(bool).sum(1) / denominator).mean()
 
 
-def df_ndcg(self, df, targets, k):
+def df_ndcg(df, targets, k):
     df = df[df.value <= k]
     tdf = targets
     bl = df.copy()
@@ -372,7 +372,7 @@ class Dataset:
             try:
                 self.test_users = pd.read_json("/".join(self.filename.split("/")[:-1]) + "/test_users.json").iloc[:, 0].astype(str)
                 print(f'test users loaded from {"/".join(self.filename.split("/")[:-1])+"/test_users.json"}')
-            except:  # noqa: E722
+            except (FileNotFoundError, OSError, ValueError, pd.errors.EmptyDataError):
                 print(f'{"/".join(self.filename.split("/")[:-1])+"/test_users.json"} not found')
                 self.test_users = pd.Series(self.all_interactions.user_id.cat.categories.to_list()).sample(n_test_users, random_state=random_state)
         else:
@@ -389,7 +389,7 @@ class Dataset:
             try:
                 self.val_users = pd.read_json("/".join(self.filename.split("/")[:-1]) + "/val_users.json").iloc[:, 0].astype(str)
                 print(f'val users loaded from {"/".join(self.filename.split("/")[:-1])+"/val_users.json"}')
-            except:  # noqa: E722
+            except (FileNotFoundError, OSError, ValueError, pd.errors.EmptyDataError):
                 print(f'{"/".join(self.filename.split("/")[:-1])+"/val_users.json"} not found')
                 self.val_users = pd.Series(self.full_train_interactions.user_id.cat.categories.to_list()).sample(n_test_users, random_state=random_state)
         else:

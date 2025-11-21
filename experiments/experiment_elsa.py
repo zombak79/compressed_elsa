@@ -3,6 +3,8 @@ import torch
 import argparse
 import subprocess
 
+os.environ["KERAS_BACKEND"] = "torch"
+
 import keras
 
 from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
@@ -64,7 +66,6 @@ parser.add_argument("--save", default="False", type=str, help="whether to save a
 
 args = parser.parse_args([] if "__file__" not in globals() else None)
 
-os.environ["KERAS_BACKEND"] = "torch"
 os.environ["CUDA_VISIBLE_DEVICES"] = f"{args.device}"
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")

@@ -4,6 +4,8 @@ import argparse
 import subprocess
 import gc
 
+os.environ["KERAS_BACKEND"] = "torch"
+
 import keras
 
 from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
@@ -73,7 +75,6 @@ args = parser.parse_args([] if "__file__" not in globals() else None)
 
 args.vals = [int(x) for x in args.vals.split(" ")]
 
-os.environ["KERAS_BACKEND"] = "torch"
 os.environ["CUDA_VISIBLE_DEVICES"] = f"{args.device}"
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")

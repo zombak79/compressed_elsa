@@ -3,6 +3,8 @@ import torch
 import argparse
 import subprocess
 
+os.environ["KERAS_BACKEND"] = "torch"
+
 import keras
 
 from _datasets.utils import Evaluation, fast_pruning, get_sparse_matrix_from_dataframe
@@ -16,7 +18,7 @@ from _datasets.config import config
 
 from time import time
 
-from utils.compressae import CompresSAE, train, make_loaders
+from recommenders.core.compressae import CompresSAE, train, make_loaders
 
 parser = argparse.ArgumentParser()
 
@@ -50,7 +52,6 @@ parser.add_argument("--flag", default="none_compressae", type=str, help="flag fo
 args = parser.parse_args([] if "__file__" not in globals() else None)
 args.vals = [int(x) for x in args.vals.split(" ")] if len(args.vals) > 0 else []
 
-os.environ["KERAS_BACKEND"] = "torch"
 os.environ["CUDA_VISIBLE_DEVICES"] = f"{args.device}"
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -59,7 +60,7 @@ try:
     seed = [int(x[1:]) for x in args.weights.split(".")[0].split("_") if x[0] == "s"][0]
     print(f"Succesfully extracted seed from args.weights ({seed}). Ignoring argument args.seed ({args.seed}).")
     args.seed = seed
-except:  # noqa: E722
+except (IndexError, ValueError, TypeError):
     print(f"Cannot extract seed from args.weights. Using args.seed ({args.seed}) instead.")
 
 

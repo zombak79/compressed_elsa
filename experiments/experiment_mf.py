@@ -83,7 +83,7 @@ if __name__ == "__main__":
     val_logs = []
     start = time()
     model.fit(X)
-    train_time = start - time()
+    train_time = time() - start
     if args.validation == "true":
         val_df_preds = model.predict_df(val_evaluator.test_src)
         val_results = val_evaluator(val_df_preds)
