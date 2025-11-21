@@ -1,54 +1,52 @@
 import os
 
 # for ALS MF
-os.environ["OMP_NUM_THREADS"]="1"
-os.environ["OPENBLAS_NUM_THREADS"]="1"
-os.environ["MKL_NUM_THREADS"]="1"
-os.environ["NUMEXPR_NUM_THREADS"]="1"
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
 from math import ceil
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
-from _datasets.utils import *
+from _datasets.utils import get_sparse_matrix_from_dataframe
 from sklearn.neighbors import NearestNeighbors
 import scipy.sparse as sp
 import implicit
 import torch
 
+
 class TopPopularRecommender:
     def __init__(self, X, item_idx):
         self.item_idx = item_idx
         self.popularities = np.array(X.sum(0))[0]
-    
-    def fit(*args, **kwargs):
+
+    def fit(self, *args, **kwargs):
         self.__init__(*args, **kwargs)
-    
+
     def predict_df(self, df, n=100, batch_size=1000):
         X_test = get_sparse_matrix_from_dataframe(df, item_indices=self.item_idx)
-        n_batches = ceil(X_test.shape[0]/batch_size)
+        n_batches = ceil(X_test.shape[0] / batch_size)
         uids = df.user_id.cat.categories.to_numpy()
-        dfs=[]
+        dfs = []
         for i in tqdm(range(n_batches)):
-            i_min = i*batch_size
-            i_max = i_min+batch_size
-            batch=X_test[i_min:i_max]
-            indices = np.argsort((1-batch.toarray())*self.popularities)[:,-n:]
-            indices = indices[:,::-1]
+            i_min = i * batch_size
+            i_max = i_min + batch_size
+            batch = X_test[i_min:i_max]
+            indices = np.argsort((1 - batch.toarray()) * self.popularities)[:, -n:]
+            indices = indices[:, ::-1]
             item_ids = self.item_idx.to_numpy()[indices]
             batch_user_ids = uids[i_min:i_max]
             values = self.popularities[indices]
-            df=pd.DataFrame({
-                "user_id": batch_user_ids,
-                "item_id": list(item_ids),
-                "value": list(values)
-            })
+            df = pd.DataFrame({"user_id": batch_user_ids, "item_id": list(item_ids), "value": list(values)})
             df = df.explode(["item_id", "value"])
             df["item_id"] = df["item_id"].astype(str).astype("category")
             df["user_id"] = df["user_id"].astype(str).astype("category")
             dfs.append(df)
-            
+
         return pd.concat(dfs)
+
 
 class KNNRecommender:
     def __init__(self, X, item_idx, neighbors):
@@ -56,8 +54,8 @@ class KNNRecommender:
         self.X = X
         self.model = NearestNeighbors(algorithm="brute", n_neighbors=neighbors, metric="cosine")
         self.model.fit(X)
-        self.neighbors =neighbors
-    
+        self.neighbors = neighbors
+
     def predict(self, X, **kwargs):
         if X.count_nonzero() == 0:
             return np.random.uniform(size=X.shape)
@@ -82,31 +80,32 @@ class KNNRecommender:
 
         X_predict[X.nonzero()] = 0
         X_predict = np.array(X_predict)
-        #filt = (1-X.toarray())
-    
-        return X_predict#*filt
-    
+        # filt = (1-X.toarray())
+
+        return X_predict  # *filt
+
     def predict_df(self, df, n=100, batch_size=1000, neighbors=None):
         if neighbors is None:
             neighbors = self.neighbors
         X_test = get_sparse_matrix_from_dataframe(df, item_indices=self.item_idx)
-        n_batches = ceil(X_test.shape[0]/batch_size)
+        n_batches = ceil(X_test.shape[0] / batch_size)
         uids = df.user_id.cat.categories.to_numpy()
-        dfs=[]
+        dfs = []
         for i in tqdm(range(n_batches)):
-            i_min = i*batch_size
-            i_max = i_min+batch_size
-            batch=X_test[i_min:i_max]
-            preds=self.predict(batch, neighbors=neighbors)
-            preds=preds*(1-batch.toarray())
-            preds=torch.from_numpy(preds)
+            i_min = i * batch_size
+            i_max = i_min + batch_size
+            batch = X_test[i_min:i_max]
+            preds = self.predict(batch, neighbors=neighbors)
+            preds = preds * (1 - batch.toarray())
+            preds = torch.from_numpy(preds)
             batch_uids = uids[i_min:i_max]
             values_, indices_ = torch.topk(preds.to("cpu"), n)
-            df = pd.DataFrame({"user_id": np.stack([batch_uids]*n).flatten("F"), "item_id": np.array(
-                self.item_idx)[indices_].flatten(), "value": values_.flatten()})
-            df["user_id"] = df["user_id"].astype(str).astype('category')
-            df["item_id"] = df["item_id"].astype(str).astype('category')
-            dfs.append(df)  
+            df = pd.DataFrame(
+                {"user_id": np.stack([batch_uids] * n).flatten("F"), "item_id": np.array(self.item_idx)[indices_].flatten(), "value": values_.flatten()}
+            )
+            df["user_id"] = df["user_id"].astype(str).astype("category")
+            df["item_id"] = df["item_id"].astype(str).astype("category")
+            dfs.append(df)
             """
             #indices = np.argsort((1-batch.toarray())*preds)[:,-n:]
             indices = np.argsort(preds)[:,-n:]
@@ -129,7 +128,8 @@ class KNNRecommender:
             """
         return pd.concat(dfs)
 
-class ALSMatrixFactorizer():
+
+class ALSMatrixFactorizer:
     def __init__(self, factors: int, regularization: float, iterations: int, use_gpu: bool, item_idx, num_threads=0):
         self.model = None
         self.factors = factors
@@ -149,50 +149,47 @@ class ALSMatrixFactorizer():
             iterations=self.iterations,
             use_gpu=self.use_gpu,
             num_threads=self.num_threads,
-
         )
         self.model.fit(X)
 
     def predict(self, X, **kwargs):
-        if not isinstance(X, scipy.sparse.csr_matrix):
-            X = scipy.sparse.csr_matrix(X)
+        if not isinstance(X, sp.csr_matrix):
+            X = sp.csr_matrix(X)
 
         if X.count_nonzero() == 0:
             return np.random.uniform(size=X.shape)
 
-        recommended_item_ids, scores = self.model.recommend(
-            np.arange(X.shape[0]), X,
-            recalculate_user=True, filter_already_liked_items=False,
-            N=X.shape[1]
-        )
+        recommended_item_ids, scores = self.model.recommend(np.arange(X.shape[0]), X, recalculate_user=True, filter_already_liked_items=False, N=X.shape[1])
         predicted_scores = np.zeros((X.shape[0], X.shape[1]))
         np.put_along_axis(predicted_scores, recommended_item_ids, scores, axis=1)
         min_score = scores.min()
         if min_score < 0:
             scores += abs(min_score) + 0.1
-        predicted_scores[X.nonzero()] = 0 # Just to be sure
+        predicted_scores[X.nonzero()] = 0  # Just to be sure
         return predicted_scores
 
     def predict_df(self, df, k=100, batch_size=1000):
         X_test = get_sparse_matrix_from_dataframe(df, item_indices=self.item_idx)
-        n_batches = ceil(X_test.shape[0]/batch_size)
+        n_batches = ceil(X_test.shape[0] / batch_size)
         uids = df.user_id.cat.categories.to_numpy()
-        dfs=[]
+        dfs = []
         for i in tqdm(range(n_batches)):
-            i_min = i*batch_size
-            i_max = i_min+batch_size
-            batch=X_test[i_min:i_max]
-            preds=self.predict(batch)
-            preds=preds*(1-batch.toarray())
-            preds=torch.from_numpy(preds)
+            i_min = i * batch_size
+            i_max = i_min + batch_size
+            batch = X_test[i_min:i_max]
+            preds = self.predict(batch)
+            preds = preds * (1 - batch.toarray())
+            preds = torch.from_numpy(preds)
             batch_uids = uids[i_min:i_max]
             values_, indices_ = torch.topk(preds.to("cpu"), k)
-            df = pd.DataFrame({"user_id": np.stack([batch_uids]*k).flatten("F"), "item_id": np.array(
-                self.item_idx)[indices_].flatten(), "value": values_.flatten()})
-            df["user_id"] = df["user_id"].astype(str).astype('category')
-            df["item_id"] = df["item_id"].astype(str).astype('category')
-            dfs.append(df)            
+            df = pd.DataFrame(
+                {"user_id": np.stack([batch_uids] * k).flatten("F"), "item_id": np.array(self.item_idx)[indices_].flatten(), "value": values_.flatten()}
+            )
+            df["user_id"] = df["user_id"].astype(str).astype("category")
+            df["item_id"] = df["item_id"].astype(str).astype("category")
+            dfs.append(df)
         return pd.concat(dfs)
+
 
 class EASERecommender:
     def __init__(self, item_idx, lambda_):
@@ -213,21 +210,22 @@ class EASERecommender:
 
     def predict_df(self, df, k=100, batch_size=1000):
         X_test = get_sparse_matrix_from_dataframe(df, item_indices=self.item_idx)
-        n_batches = ceil(X_test.shape[0]/batch_size)
+        n_batches = ceil(X_test.shape[0] / batch_size)
         uids = df.user_id.cat.categories.to_numpy()
-        dfs=[]
+        dfs = []
         for i in tqdm(range(n_batches)):
-            i_min = i*batch_size
-            i_max = i_min+batch_size
-            batch=X_test[i_min:i_max].toarray()
-            preds=self.predict(batch)
-            preds=preds*(1-batch)
-            preds=torch.from_numpy(preds)
+            i_min = i * batch_size
+            i_max = i_min + batch_size
+            batch = X_test[i_min:i_max].toarray()
+            preds = self.predict(batch)
+            preds = preds * (1 - batch)
+            preds = torch.from_numpy(preds)
             batch_uids = uids[i_min:i_max]
             values_, indices_ = torch.topk(preds.to("cpu"), k)
-            df = pd.DataFrame({"user_id": np.stack([batch_uids]*k).flatten("F"), "item_id": np.array(
-                self.item_idx)[indices_].flatten(), "value": values_.flatten()})
-            df["user_id"] = df["user_id"].astype(str).astype('category')
-            df["item_id"] = df["item_id"].astype(str).astype('category')
-            dfs.append(df)            
+            df = pd.DataFrame(
+                {"user_id": np.stack([batch_uids] * k).flatten("F"), "item_id": np.array(self.item_idx)[indices_].flatten(), "value": values_.flatten()}
+            )
+            df["user_id"] = df["user_id"].astype(str).astype("category")
+            df["item_id"] = df["item_id"].astype(str).astype("category")
+            dfs.append(df)
         return pd.concat(dfs)

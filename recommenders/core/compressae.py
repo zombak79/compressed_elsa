@@ -9,6 +9,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader, random_split
 from tqdm import tqdm
 
+
 def l2_normalize(x: torch.Tensor, dim: int = -1) -> torch.Tensor:
     return x / x.norm(dim=dim, keepdim=True)
 
@@ -67,10 +68,12 @@ class CompresSAE(nn.Module):
         optimizer.step()
         return losses
 
+
 class EmbeddingDataset(Dataset):
     """
     Wrap a 2D numpy array (N, D). Returns (x, x) pairs for AE training.
     """
+
     def __init__(self, embeddings: np.ndarray, dtype=torch.float32):
         assert isinstance(embeddings, np.ndarray) and embeddings.ndim == 2
         self.x = torch.from_numpy(embeddings).to(dtype)
@@ -81,6 +84,7 @@ class EmbeddingDataset(Dataset):
     def __getitem__(self, idx):
         x = self.x[idx]
         return x, x
+
 
 @torch.no_grad()
 def evaluate(model, loader, device: torch.device):
@@ -96,21 +100,6 @@ def evaluate(model, loader, device: torch.device):
         n += bs
     return {k: v / max(n, 1) for k, v in agg.items()}
 
-def make_loader(
-    embeddings: np.ndarray,
-    batch_size: int = 256,
-    val_ratio: float = 0.1,
-    num_workers: int = 0,
-    seed: int = 42,
-):
-    g = torch.Generator().manual_seed(seed)
-    ds = EmbeddingDataset(embeddings)
-
-    train_loader = DataLoader(
-        ds, batch_size=batch_size, shuffle=True,  # ← reshuffles each epoch
-        drop_last=False, num_workers=num_workers, pin_memory=True
-    )
-    return train_loader
 
 def make_loaders(
     embeddings: np.ndarray,
@@ -123,21 +112,23 @@ def make_loaders(
     ds = EmbeddingDataset(embeddings)
     n_val = max(1, int(math.floor(len(ds) * val_ratio)))
     n_train = len(ds) - n_val
-    
+
     if val_ratio == 0:
         train_ds, val_ds = ds, ds
     else:
         train_ds, val_ds = random_split(ds, [n_train, n_val], generator=g)
 
     train_loader = DataLoader(
-        train_ds, batch_size=batch_size, shuffle=True,  # ← reshuffles each epoch
-        drop_last=False, num_workers=num_workers, pin_memory=True
+        train_ds,
+        batch_size=batch_size,
+        shuffle=True,  # ← reshuffles each epoch
+        drop_last=False,
+        num_workers=num_workers,
+        pin_memory=True,
     )
-    val_loader = DataLoader(
-        val_ds, batch_size=batch_size, shuffle=False,
-        drop_last=False, num_workers=num_workers, pin_memory=True
-    )
+    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, drop_last=False, num_workers=num_workers, pin_memory=True)
     return train_loader, val_loader
+
 
 def train(
     model,
@@ -149,31 +140,31 @@ def train(
     device: str | torch.device = "cuda" if torch.cuda.is_available() else "cpu",
     grad_clip: float | None = None,
     verbose: bool = True,
-    early_stopping = 0,
-    optimizer = None,
-    scheduler = None,
-    annealing = [],
+    early_stopping=0,
+    optimizer=None,
+    scheduler=None,
+    annealing=[],
 ):
     device = torch.device(device)
     model = model.to(device)
-    if len(annealing)>0:
+    if len(annealing) > 0:
         print(f"Using annealing startegy {annealing}")
     else:
         print("No annealing startegy.")
     if optimizer is None:
         optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
-    
+
     best_val = float("inf")
     best_state = None
     final_k = model.k
     early_stop = 0
     for epoch in (pbar := tqdm(range(1, epochs + 1))):
-        if len(annealing)>0:
+        if len(annealing) > 0:
             if epoch >= len(annealing):
                 model.k = final_k
                 print(f"setting k for final training to {model.k}")
             else:
-                model.k = annealing[epoch-1]
+                model.k = annealing[epoch - 1]
                 print(f"setting k to {model.k}")
         model.train()
         if scheduler is not None:
@@ -200,18 +191,15 @@ def train(
             best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
         else:
             early_stop += 1
-        
+
         if verbose:
-            pbar.set_description(f"train Loss {train_loss:.6f} | "+
-                  f"val Loss {val_loss:.6f} | val Cos {val_metrics['Cosine']:.6f} | "+
-                  f"val L2 {val_metrics['L2']:.6f}"
+            pbar.set_description(
+                f"train Loss {train_loss:.6f} | " + f"val Loss {val_loss:.6f} | val Cos {val_metrics['Cosine']:.6f} | " + f"val L2 {val_metrics['L2']:.6f}"
             )
 
-        if early_stopping!=0 and early_stop > early_stopping:
+        if early_stopping != 0 and early_stop > early_stopping:
             print("stopping early")
             break
-            
-    
 
     if best_state is not None:
         model.load_state_dict(best_state)

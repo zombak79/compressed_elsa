@@ -15,23 +15,22 @@ if __name__ == "__main__":
 
     print(data)
     for script in list(data.keys()):
-
         list_data = {}
         static_data = {}
 
         for key in data[script].keys():
             if isinstance(data[script][key], list):
-                list_data[key]=data[script][key]
+                list_data[key] = data[script][key]
             else:
-                static_data[key]=data[script][key]
+                static_data[key] = data[script][key]
 
-        dd={}
+        dd = {}
 
         for other_key in list_data.keys():
-            ll=[]
-            for l in list_data[other_key]:
-                ll.append((other_key,l))
-            dd[other_key]=ll
+            ll = []
+            for l_ in list_data[other_key]:
+                ll.append((other_key, l_))
+            dd[other_key] = ll
 
         list(dd.values())
         res = [list(x) for x in list(itertools.product(*list(dd.values())))]
@@ -40,17 +39,18 @@ if __name__ == "__main__":
             for static_key, static_val in static_data.items():
                 r.append((static_key, static_val))
 
-        
         for parset in list(set([tuple(set(x)) for x in res])):
             print(parset)
             out = subprocess.check_output(
                 [
-                    'python', script,
-                ] + [a for b in parset for a in b]
+                    "python",
+                    script,
+                ]
+                + [a for b in parset for a in b]
             )
-            dirname=[x for x in out.decode("utf-8").split("\n") if x[:len("results/")]=="results/"][0]
-            
-            with open(os.path.join(dirname, 'stdout.log'), 'w') as f:
+            dirname = [x for x in out.decode("utf-8").split("\n") if x[: len("results/")] == "results/"][0]
+
+            with open(os.path.join(dirname, "stdout.log"), "w") as f:
                 f.write(out.decode("utf-8"))
 
             print(out)
